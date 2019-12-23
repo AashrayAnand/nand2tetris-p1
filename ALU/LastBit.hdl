@@ -1,0 +1,13 @@
+// File name: projects/02/Bus16.hdl
+
+/**
+ * Takes an input bus, and returns the MSB
+ */
+
+CHIP LastBit {
+    IN in[16];    // 16-bit bus
+    OUT out;  // MSB of in
+
+    PARTS:
+    And(a=in[15], b=in[15], out=out);
+}

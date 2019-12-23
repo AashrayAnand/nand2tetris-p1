@@ -1,0 +1,13 @@
+// File name: projects/02/Bus16.hdl
+
+/**
+ * Takes an input bus, and returns the LSB
+ */
+
+CHIP FirstBit {
+    IN in[16];    // 16-bit bus
+    OUT out;  // LSB of in
+
+    PARTS:
+    And(a=in[0], b=in[0], out=out);
+}

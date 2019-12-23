@@ -1,0 +1,109 @@
+// by Nisan and Schocken, MIT Press.
+// File name: projects/02/ALU.hdl
+
+/**
+ * The ALU (Arithmetic Logic Unit).
+ * Computes one of the following functions:
+ * x+y, x-y, y-x, 0, 1, -1, x, y, -x, -y, !x, !y,
+ * x+1, y+1, x-1, y-1, x&y, x|y on two 16-bit inputs,
+ * according to 6 input bits denoted zx,nx,zy,ny,f,no.
+ * In addition, the ALU computes two 1-bit outputs:
+ * if the ALU output == 0, zr is set to 1; otherwise zr is set to 0;
+ * if the ALU output < 0, ng is set to 1; otherwise ng is set to 0.
+ */
+
+// Implementation: the ALU logic manipulates the x and y inputs
+// and operates on the resulting values, as follows:
+// if (zx == 1) set x = 0        // 16-bit constant
+// if (nx == 1) set x = !x       // bitwise not
+// if (zy == 1) set y = 0        // 16-bit constant
+// if (ny == 1) set y = !y       // bitwise not
+// if (f == 1)  set out = x + y  // integer 2's complement addition
+// if (f == 0)  set out = x & y  // bitwise and
+// if (no == 1) set out = !out   // bitwise not
+// if (out == 0) set zr = 1
+// if (out < 0) set ng = 1
+
+CHIP ALU {
+    IN
+        x[16], y[16],  // 16-bit inputs
+        zx, // zero the x input?
+        nx, // negate the x input?
+        zy, // zero the y input?
+        ny, // negate the y input?
+        f,  // compute out = x + y (if 1) or x & y (if 0)
+        no; // negate the out output?
+
+    OUT
+        out[16], // 16-bit output
+        zr, // 1 if (out == 0), 0 otherwise
+        ng; // 1 if (out < 0),  0 otherwise
+
+    PARTS:
+   // Put you code here
+
+    // zero out x if zx = 1 by negating zx
+    // extending it to a 16-bit bus, and anding
+    // the result with x
+    //And16(a=x, b=y, out=out);
+    //And(a=zx, b=zx, out=zr);
+    //And(a=zx, b=zx, out=ng);
+
+    Not(in=zx, out=nzx);
+    Bus16(in=nzx, out=nzx16);
+    And16(a=x, b=nzx16, out=x2);
+
+    // negate x if nx = 1 by applying Xor elementwise
+    // can extend nx to a 16-bit bus and use Xor16
+    Bus16(in=nx, out=nx16);
+    Xor16(a=nx16, b=x2, out=x3);
+
+    // zero out y if zy = 1 by negating zy
+    // extending it to a 16-bit bus, and anding
+    // the result with y
+    Not(in=zy, out=nzy);
+    Bus16(in=nzy, out=nzy16);
+    And16(a=y, b=nzy16, out=y2);
+
+    // negate y if ny = 1 by applying Xor elementwise
+    // can extend ny to a 16-bit bus and use Xor16
+    Bus16(in=ny, out=ny16);
+    Xor16(a=ny16, b=y2, out=y3);
+
+    // the result should either be x + y or x & y
+    // where the addition term goes away if f=0
+    // and the bitwise and term goes away if f=1
+    // get 16-bit bus of f
+    Bus16(in=f, out=f16);
+    // get 16-bit bus of negation of f
+    Not(in=f, out=nf);
+    Bus16(in=nf, out=nf16);
+    // add x and y
+    Add16(a=x3, b=y3, out=XplusY);
+    // bitwise and the sum of x and y with the 16-bit bus of f
+    And16(a=XplusY, b=f16, out=XplusYterm);
+
+    // compute bitwise and of x and y
+    And16(a=x3, b=y3, out=XandY);
+    // bitwise  and the bitwise and of x and y with the 16-bit bus of fs
+    And16(a=XandY, b=nf16, out=XandYterm);
+
+    // compute bitwise or of two previously computed terms
+    // if f = 1, then it will be (x + y) OR 0 = x + y
+    // if f = 0, then it will be  0 OR (x & y) = x & y
+    //Or16(a=XplusYterm, b=XandYterm, out=x);
+    Or16(a=XplusYterm, b=XandYterm, out=outHold);
+    Bus16(in=no, out=no16);
+    Xor16(a=outHold, b=no16, out=out);
+
+
+    // get the output (negated if necessary)
+    Xor16(a=outHold, b=no16, out=out2);
+    // get max bit of output (1 if not zero)
+    MaxBit(in=out2, out=zrNonNeg);
+    // negate max bit, so zr = 1 if maxbit = 0
+    Not(in=zrNonNeg, out=zr);
+
+    // return sign bit as ng (will be 1 if out is negative)
+    LastBit(in=out2, out=ng);
+}

@@ -1,0 +1,34 @@
+
+    // 001
+    And(a=NotZeroOne, b=sel[0], out=NotZeroOneAndTwo);
+    And(a=in, b=NotZeroOneAndTwo, out=b);
+
+    // 010
+    And(a=NotSZero, b=NotSTwo, out=NotZeroTwo);
+    And(a=NotZeroTwo, b=sel[1], out=NotZeroTwoAndOne);
+    And(a=in, b=NotZeroTwoAndOne, out=c);
+
+    // 011
+    And(a=sel[0], b=sel[1], out=OneAndTwo);
+    And(a=NotZeroOne, b=OneAndTwo, out=NotZeroAndOneAndTwo);
+    And(a=in, b=NotZeroAndOneAndTwo, out=d);
+
+    // 100
+    And(a=NotSOne, b=NotSTwo, out=NotOneTwo);
+    And(a=sel[2], b=NotOneTwo, out=ZeroAndNotOneTwo);
+    And(a=in, b=ZeroAndNotOneTwo, out=e);
+
+    // 101
+    And(a=sel[2], b=NotSOne, out=ZeroAndNotOne);
+    And(a=ZeroAndNotOne, b=sel[0], out=ZeroAndNotOneAndTwo);
+    And(a=in, b=ZeroAndNotOneAndTwo, out=f);
+
+    // 110
+    And(a=sel[2], b=sel[1], out=ZeroAndOne);
+    And(a=ZeroAndOne, b=NotSTwo, out=ZeroOneAndNotTwo);
+    And(a=in, b=ZeroOneAndNotTwo, out=g);
+
+
+    // 111
+    And(a=ZeroAndOne, b=sel[0], out=ZeroOneTwo);
+    And(a=in, b=ZerOneTwo, out=h);
