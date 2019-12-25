@@ -13,18 +13,13 @@
 
 // Put your code here.
 
-// screen has 512 registers, can use this variable for
-// making it easy to iterate over them
-@511
-D=A
-@screensize
-M=D
+
 (loop)
-  @i // set i to 0 before clearing or filling
-  M=0
+  @SCREEN
+  D=A
 
-  // check keyboard register
-
+  @addr
+  M=D
 
   @KBD
   D=M // store keyboard value
@@ -38,41 +33,40 @@ M=D
   @loop
   0;JMP
 
-(fill) // label for action when keyboard is pressed
-
-  @i
-  D=M
-  @screensize
-  D=D-M
-  @loop
-  D;JGT // jump back to main loop once have filled pixels
-
-  @i
-  D=M
-  @SCREEN
-  A=A+D // get ith register of screen
-  M=-1 // fill ith register of screen
-  @i
-  M=M+1 // increment i
-
-  @fill // jump back to fill if we haven't filled pixels
-  0;JMP
 (clear)
+  // set color to be 0
+  @color
+  M=0
+  @apply
+  0;JMP
 
-  @i
+(fill)
+  // set color to be -1
+  @color
+  M=-1
+  @apply
+  0;JMP
+
+// iterate from 0 to 511
+// apply color in each register
+(apply)
+
+  @color // get color
   D=M
-  @screensize
-  D=D-M
+
+  @addr // apply color at current address
+  A=M
+  M=D
+
+  @addr
+  M=M+1
+  D=M // get next screen address
+  @KBD
+  D=A-D // get difference between current screen
+        // address and keyboard memory map address
+
+  @apply
+  D;JGT
+
   @loop
-  D;JGT // jump back to main loop once have cleared pixels
-
-  @i
-  D=M
-  @SCREEN
-  A=A+D // get ith register of screen
-  M=0 // clear ith register of screen
-  @i
-  M=M+1 // increment i
-
-  @clear // jump back to fill if we haven't cleared pixels
   0;JMP
